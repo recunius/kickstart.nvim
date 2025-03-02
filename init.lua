@@ -1005,6 +1005,10 @@ require('lazy').setup({
     'akinsho/toggleterm.nvim',
     version = '*',
     config = true,
+    opts = {
+      direction = 'horizontal',
+      open_mapping = [[<leader>m]],
+    },
   },
   {
     'NeogitOrg/neogit',
@@ -1075,6 +1079,15 @@ vim.api.nvim_create_autocmd('FileType', {
     print 'Markdown modeline disabled'
   end,
 })
+
+local Terminal = require('toggleterm.terminal').Terminal
+local lazygit = Terminal:new { cmd = 'lazygit', hidden = true, direction = 'float' }
+
+function _lazygit_toggle()
+  lazygit:toggle()
+end
+
+vim.api.nvim_set_keymap('n', '<leader>g', '<cmd>lua _lazygit_toggle()<CR>', { noremap = true, silent = true })
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

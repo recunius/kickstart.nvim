@@ -1011,6 +1011,144 @@ require('lazy').setup({
     },
   },
   {
+    'nvim-neotest/neotest',
+    dependencies = {
+      'nvim-neotest/nvim-nio',
+      'nvim-lua/plenary.nvim',
+      'marilari88/neotest-vitest',
+    },
+    config = function()
+      ---@diagnostic disable-next-line: missing-fields
+      require('neotest').setup {
+        ---@diagnostic disable-next-line: missing-fields
+        adapters = {
+          require 'neotest-vitest' {
+            -- Adjust these paths based on your project structure
+            vitestCommand = 'pnpm test', -- or "yarn vitest" based on your setup
+            env = { CI = true },
+            cwd = function(path)
+              -- This will check if the file is in the backend directory
+              if path and path:match 'backend' then
+                return vim.fn.getcwd() .. '/backend'
+              end
+              -- Fallback to current directory
+              return vim.fn.getcwd()
+            end,
+          },
+        },
+        icons = {
+          failed = '✖',
+          passed = '✓',
+          running = '🔄',
+          skipped = '⏭️',
+          unknown = '?',
+        },
+        output = {
+          enabled = true,
+          open_on_run = true,
+        },
+        ---@diagnostic disable-next-line: missing-fields
+        summary = {
+          enabled = true,
+          expand_errors = true,
+          follow = true,
+          ---@diagnostic disable-next-line: missing-fields
+          mappings = {
+            expand = { '<CR>', '<2-LeftMouse>' },
+            open = 'o',
+            jumpto = 'i',
+            output = 'o',
+            run = 'r',
+            stop = 'u',
+          },
+        },
+        status = {
+          enabled = true,
+          virtual_text = true,
+          signs = true,
+        },
+        strategies = {
+          integrated = {
+            width = 120,
+            height = 40,
+          },
+        },
+        floating = {
+          border = 'rounded',
+          max_height = 0.9,
+          max_width = 0.9,
+          options = {},
+        },
+      }
+    end,
+    keys = {
+      { '<leader>t', '', desc = '+test' },
+      {
+        '<leader>tt',
+        function()
+          require('neotest').run.run(vim.fn.expand '%')
+        end,
+        desc = 'Run File (Neotest)',
+      },
+      {
+        '<leader>tT',
+        function()
+          require('neotest').run.run(vim.uv.cwd())
+        end,
+        desc = 'Run All Test Files (Neotest)',
+      },
+      {
+        '<leader>tr',
+        function()
+          require('neotest').run.run()
+        end,
+        desc = 'Run Nearest (Neotest)',
+      },
+      {
+        '<leader>tl',
+        function()
+          require('neotest').run.run_last()
+        end,
+        desc = 'Run Last (Neotest)',
+      },
+      {
+        '<leader>ts',
+        function()
+          require('neotest').summary.toggle()
+        end,
+        desc = 'Toggle Summary (Neotest)',
+      },
+      {
+        '<leader>to',
+        function()
+          require('neotest').output.open { enter = true, auto_close = true }
+        end,
+        desc = 'Show Output (Neotest)',
+      },
+      {
+        '<leader>tO',
+        function()
+          require('neotest').output_panel.toggle()
+        end,
+        desc = 'Toggle Output Panel (Neotest)',
+      },
+      {
+        '<leader>tS',
+        function()
+          require('neotest').run.stop()
+        end,
+        desc = 'Stop (Neotest)',
+      },
+      {
+        '<leader>tw',
+        function()
+          require('neotest').watch.toggle(vim.fn.expand '%')
+        end,
+        desc = 'Toggle Watch (Neotest)',
+      },
+    },
+  },
+  {
     'NeogitOrg/neogit',
     dependencies = {
       'nvim-lua/plenary.nvim', -- required
@@ -1088,6 +1226,19 @@ function _lazygit_toggle()
 end
 
 vim.api.nvim_set_keymap('n', '<leader>g', '<cmd>lua _lazygit_toggle()<CR>', { noremap = true, silent = true })
+function _G.set_terminal_keymaps()
+  local opts = { buffer = 0 }
+  vim.keymap.set('t', '<esc>', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', 'jk', [[<C-\><C-n>]], opts)
+  vim.keymap.set('t', '<C-h>', [[<Cmd>wincmd h<CR>]], opts)
+  vim.keymap.set('t', '<C-j>', [[<Cmd>wincmd j<CR>]], opts)
+  vim.keymap.set('t', '<C-k>', [[<Cmd>wincmd k<CR>]], opts)
+  vim.keymap.set('t', '<C-l>', [[<Cmd>wincmd l<CR>]], opts)
+  vim.keymap.set('t', '<C-w>', [[<C-\><C-n><C-w>]], opts)
+end
+
+-- if you only want these mappings for toggle term use term://*toggleterm#* instead
+vim.cmd 'autocmd! TermOpen term://* lua set_terminal_keymaps()'
 
 -- The line beneath this is called `modeline`. See `:help modeline`
 -- vim: ts=2 sts=2 sw=2 et

@@ -1008,6 +1008,7 @@ require('lazy').setup({
     opts = {
       direction = 'horizontal',
       open_mapping = [[<leader>h]],
+      insert_mappings = false,
     },
   },
   {
